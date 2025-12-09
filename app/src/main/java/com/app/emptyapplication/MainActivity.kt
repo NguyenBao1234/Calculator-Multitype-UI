@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,7 +66,7 @@ fun CalculatorApp() {
 fun SpinnerCalculator() {
     var num1 by remember { mutableStateOf("") }
     var num2 by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var bExpanding by remember { mutableStateOf(false) }
     var selectedOp by remember { mutableStateOf("+") }
     var result by remember { mutableStateOf("") }
     val operations = listOf("+", "-", "×", "÷", "%", "//", "^", "√")
@@ -81,7 +83,7 @@ fun SpinnerCalculator() {
 
         OutlinedTextField(
             value = num1,
-            onValueChange = { num1 = it },
+            onValueChange = {newValue -> num1 = newValue },
             label = { Text("Số thứ nhất") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -90,30 +92,30 @@ fun SpinnerCalculator() {
         Spacer(modifier = Modifier.height(16.dp))
 
         ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
+            expanded = bExpanding,
+            onExpandedChange = { bExpanding = !bExpanding }
         ) {
             OutlinedTextField(
                 value = selectedOp,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Phép tính") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = bExpanding) },
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth(),
                 singleLine = true
             )
             ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
+                expanded = bExpanding,
+                onDismissRequest = { bExpanding = false }
             ) {
                 operations.forEach { op ->
                     DropdownMenuItem(
                         text = { Text(op) },
                         onClick = {
                             selectedOp = op
-                            expanded = false
+                            bExpanding = false
                         }
                     )
                 }
@@ -163,9 +165,11 @@ fun RadioCalculator() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+
     ) {
         Text("Máy Tính - Radio Button", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(24.dp))
@@ -253,7 +257,7 @@ fun ListViewCalculator() {
             Text("Máy Tính - ListView", fontSize = 24.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = num1,
                 onValueChange = { num1 = it },
                 label = { Text("Số thứ nhất") },
@@ -283,10 +287,12 @@ fun ListViewCalculator() {
                                     )
                                 }
                             },
+
                             color = if (selectedOp == op)
                                 MaterialTheme.colorScheme.primaryContainer
                             else
                                 MaterialTheme.colorScheme.surface,
+
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
@@ -301,7 +307,7 @@ fun ListViewCalculator() {
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            TextField(
                 value = num2,
                 onValueChange = { num2 = it },
                 label = { Text("Số thứ hai") },
@@ -337,6 +343,7 @@ fun ButtonCalculator() {
     var num1 by remember { mutableStateOf("") }
     var num2 by remember { mutableStateOf("") }
     var result by remember { mutableStateOf("") }
+    var selectedOp by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -375,16 +382,56 @@ fun ButtonCalculator() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = { result = calculate(num1, num2, "+") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "+")
+                selectedOp = "+"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "+")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("+", fontSize = 24.sp)
             }
-            Button(onClick = { result = calculate(num1, num2, "-") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "-")
+                selectedOp = "-"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "-")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("-", fontSize = 24.sp)
             }
-            Button(onClick = { result = calculate(num1, num2, "×") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "×")
+                selectedOp ="×"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "×")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("×", fontSize = 24.sp)
             }
-            Button(onClick = { result = calculate(num1, num2, "÷") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "÷")
+                selectedOp = "÷"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "÷")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("÷", fontSize = 24.sp)
             }
         }
@@ -393,16 +440,56 @@ fun ButtonCalculator() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = { result = calculate(num1, num2, "%") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "%")
+                selectedOp = "%"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "%")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("%", fontSize = 24.sp)
             }
-            Button(onClick = { result = calculate(num1, num2, "//") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "//")
+                selectedOp = "//"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "//")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("//", fontSize = 20.sp)
             }
-            Button(onClick = { result = calculate(num1, num2, "^") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "^")
+                selectedOp = "^"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "^")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ) {
                 Text("^", fontSize = 24.sp)
             }
-            Button(onClick = { result = calculate(num1, num2, "√") }) {
+            Button(onClick = {
+                result = calculate(num1, num2, "√")
+                selectedOp = "√"
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedOp == "√")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.secondary
+                )
+            ){
                 Text("√", fontSize = 24.sp)
             }
         }
